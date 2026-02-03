@@ -1,3 +1,4 @@
+
 // import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import { Plus, Minus, X, ArrowLeft, CreditCard, ShoppingBag, Loader2, Truck, MapPin } from 'lucide-react';
@@ -26,7 +27,7 @@
 //   // Business pickup location (Teshie-Aboma, Accra, Ghana)
 //   const PICKUP_LOCATION = {
 //     lat: 5.5846,
-//     lng: -0.1135, // Negative for Ghana (West of Prime Meridian)
+//     lng: -0.1135,
 //     address: 'KAE DABI HOUSE, Teshie, Aboma, Accra, Ghana',
 //   };
 
@@ -44,15 +45,12 @@
 //         console.log('Paystack is ready');
 //       } else {
 //         setPaystackReady(false);
-//         // Retry after a short delay
 //         setTimeout(checkPaystack, 500);
 //       }
 //     };
 
-//     // Initial check
 //     checkPaystack();
 
-//     // Also listen for script load event
 //     const script = document.querySelector('script[src*="paystack"]');
 //     if (script) {
 //       script.addEventListener('load', checkPaystack);
@@ -102,7 +100,6 @@
 //     });
 //   };
 
-//   // Get user's location or geocode address
 //   const getDeliveryQuotes = async () => {
 //     if (!deliveryAddress.address.trim()) {
 //       alert('Please enter a delivery address');
@@ -114,13 +111,6 @@
 //     setSelectedQuote(null);
 
 //     try {
-//       // For now, we'll use a geocoding service or let user enter coordinates
-//       // In production, you'd use Google Maps Geocoding API or similar
-//       // For demo, we'll prompt for coordinates or use a geocoding service
-      
-//       // If coordinates are not available, you can use a geocoding service
-//       // For now, we'll show an alert to enter coordinates manually or integrate geocoding
-      
 //       const SAIL_API_KEY = import.meta.env.VITE_SAIL_API_KEY || '';
       
 //       if (!SAIL_API_KEY) {
@@ -129,8 +119,6 @@
 //         return;
 //       }
 
-//       // Try to get coordinates from address using browser geolocation or geocoding
-//       // For now, we'll use a simple approach - you can enhance this with Google Geocoding
 //       const destinationCoords = await geocodeAddress(deliveryAddress.address);
       
 //       if (!destinationCoords) {
@@ -179,11 +167,8 @@
 //     }
 //   };
 
-//   // Geocode address to get coordinates
-//   // You can integrate with Google Maps Geocoding API, Mapbox, or other services
 //   const geocodeAddress = async (address) => {
 //     try {
-//       // Option 1: Use Google Maps Geocoding API (recommended)
 //       const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
       
 //       if (GOOGLE_MAPS_API_KEY) {
@@ -201,7 +186,6 @@
 //         }
 //       }
 
-//       // Option 2: Use browser geolocation API (for "current location")
 //       if (address.toLowerCase().includes('current location') || address.toLowerCase().includes('my location')) {
 //         return new Promise((resolve) => {
 //           if (navigator.geolocation) {
@@ -220,7 +204,6 @@
 //         });
 //       }
 
-//       // Option 3: Try using OpenStreetMap Nominatim (free, no API key needed)
 //       try {
 //         const response = await fetch(
 //           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Ghana')}&limit=1`
@@ -283,17 +266,14 @@
 //   };
 
 //   const handleProceedToPayment = () => {
-//     // Validate customer info (name and phone are required, order notes is optional)
 //     if (!customerInfo.name || !customerInfo.phone) {
 //       alert('Please fill in your name and phone number');
 //       return;
 //     }
 
-//     // Validate phone number (Ghana format) - more flexible regex
 //     const phoneRegex = /^(\+233|0|233)[0-9]{9}$/;
 //     let cleanedPhone = customerInfo.phone.replace(/\s/g, '').replace(/-/g, '');
     
-//     // Normalize phone number to +233 format
 //     if (cleanedPhone.startsWith('0')) {
 //       cleanedPhone = '+233' + cleanedPhone.substring(1);
 //     } else if (cleanedPhone.startsWith('233') && !cleanedPhone.startsWith('+233')) {
@@ -305,53 +285,40 @@
 //       return;
 //     }
 
-//     // Get Paystack public key from environment
 //     const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
     
 //     if (!PAYSTACK_PUBLIC_KEY) {
 //       alert('Payment gateway is not configured. Please contact support.');
 //       console.error('Paystack public key is missing. Please set VITE_PAYSTACK_PUBLIC_KEY in your .env file');
-//       console.error('Current env check:', {
-//         hasKey: !!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-//         keyLength: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY?.length,
-//         keyPrefix: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY?.substring(0, 10),
-//       });
 //       return;
 //     }
 
-//     // Validate API key format
 //     if (!PAYSTACK_PUBLIC_KEY.startsWith('pk_test_') && !PAYSTACK_PUBLIC_KEY.startsWith('pk_live_')) {
 //       alert('Invalid Paystack API key format. Please check your configuration.');
 //       console.error('Invalid Paystack key format. Key should start with pk_test_ or pk_live_');
 //       return;
 //     }
 
-//     const totalAmount = getTotalPrice() * 100; // Convert to pesewas (Paystack uses pesewas for GHS)
+//     const totalAmount = getTotalPrice() * 100;
     
-//     // Validate minimum amount (Paystack minimum is usually 100 pesewas = 1 GHS)
 //     if (totalAmount < 100) {
 //       alert('Minimum order amount is GHS 1.00');
 //       return;
 //     }
 
 //     const reference = `EDUROM${Date.now()}`;
-
-//     // Generate email for Paystack (required by Paystack) - sanitize phone number
 //     const sanitizedPhone = cleanedPhone.replace(/[^0-9]/g, '');
 //     const paystackEmail = `customer${sanitizedPhone}@eduromonaa.com`;
 
-//     // Check if Paystack is loaded
 //     if (typeof window.PaystackPop === 'undefined' || !paystackReady) {
 //       alert('Payment gateway is loading. Please wait a moment and try again.');
-//       console.warn('Paystack not ready. PaystackPop:', typeof window.PaystackPop, 'paystackReady:', paystackReady);
-//       // Retry after a short delay
+//       console.warn('Paystack not ready');
 //       setTimeout(() => {
 //         if (typeof window.PaystackPop !== 'undefined') {
 //           setPaystackReady(true);
 //           handleProceedToPayment();
 //         } else {
 //           alert('Payment gateway failed to load. Please refresh the page and try again.');
-//           console.error('Paystack script failed to load after retry');
 //         }
 //       }, 2000);
 //       return;
@@ -360,13 +327,7 @@
 //     setIsProcessing(true);
 
 //     try {
-//       console.log('Setting up Paystack payment with:', {
-//         key: PAYSTACK_PUBLIC_KEY.substring(0, 15) + '...',
-//         email: paystackEmail,
-//         amount: totalAmount,
-//         currency: 'GHS',
-//         ref: reference,
-//       });
+//       console.log('Setting up Paystack payment');
 
 //       const handler = window.PaystackPop.setup({
 //         key: PAYSTACK_PUBLIC_KEY,
@@ -403,94 +364,65 @@
 //             },
 //           ],
 //         },
-//         callback: async function (response) {
-//           try {
-//             // Payment successful - verify response
-//             if (!response || !response.reference) {
-//               throw new Error('Invalid payment response');
-//             }
-
-//             console.log('Payment successful:', response);
-            
-//             // Book delivery if enabled and quote selected
-//             if (deliveryEnabled && selectedQuote) {
-//               setIsProcessing(true);
-//               try {
-//                 const delivery = await bookDelivery(selectedQuote.id);
-                
-//                 if (delivery) {
-//                   // Save delivery info
-//                   localStorage.setItem('deliveryBooking', JSON.stringify(delivery));
-//                   console.log('Delivery booked successfully:', delivery);
-//                 } else {
-//                   console.warn('Delivery booking returned null/undefined');
+//         callback: function (response) {
+//           console.log('Payment successful:', response);
+          
+//           // Handle delivery booking and cleanup
+//           const processOrder = async () => {
+//             try {
+//               if (deliveryEnabled && selectedQuote) {
+//                 try {
+//                   const delivery = await bookDelivery(selectedQuote.id);
+//                   if (delivery) {
+//                     localStorage.setItem('deliveryBooking', JSON.stringify(delivery));
+//                     console.log('Delivery booked successfully:', delivery);
+//                   }
+//                 } catch (deliveryError) {
+//                   console.error('Delivery booking failed:', deliveryError);
 //                 }
-//               } catch (deliveryError) {
-//                 console.error('Delivery booking failed:', deliveryError);
-//                 // Payment was successful, but delivery failed
-//                 alert(`Payment successful! However, delivery booking failed. Please contact support with reference: ${response.reference}`);
-//               } finally {
-//                 setIsProcessing(false);
 //               }
-//             }
-            
-//             // Clear cart after successful payment
-//             localStorage.removeItem('cart');
-            
-//             // Save order info for reference
-//             localStorage.setItem('lastOrder', JSON.stringify({
-//               reference: response.reference,
-//               customerName: customerInfo.name,
-//               customerPhone: cleanedPhone,
-//               totalAmount: totalAmount / 100,
-//               items: cart,
-//               timestamp: new Date().toISOString(),
-//               deliveryBooked: deliveryEnabled && selectedQuote ? true : false,
-//             }));
-            
-//             // Show success message
-//             const deliveryMsg = deliveryEnabled && selectedQuote 
-//               ? '\n\nDelivery has been booked!' 
-//               : '';
-//             alert(`Payment successful! Reference: ${response.reference}${deliveryMsg}`);
-            
-//             // Redirect to home with success message
-//             navigate('/', { 
-//               state: { 
-//                 paymentSuccess: true, 
+              
+//               localStorage.removeItem('cart');
+              
+//               localStorage.setItem('lastOrder', JSON.stringify({
 //                 reference: response.reference,
 //                 customerName: customerInfo.name,
+//                 customerPhone: cleanedPhone,
+//                 totalAmount: totalAmount / 100,
+//                 items: cart,
+//                 timestamp: new Date().toISOString(),
 //                 deliveryBooked: deliveryEnabled && selectedQuote ? true : false,
-//               } 
-//             });
-//           } catch (error) {
-//             console.error('Error processing payment callback:', error);
-//             setIsProcessing(false);
-//             alert(`Payment was successful, but there was an error processing your order. Please contact support with reference: ${response?.reference || 'N/A'}`);
-//           }
+//               }));
+              
+//               navigate('/', { 
+//                 state: { 
+//                   paymentSuccess: true, 
+//                   reference: response.reference,
+//                   customerName: customerInfo.name,
+//                   deliveryBooked: deliveryEnabled && selectedQuote ? true : false,
+//                 } 
+//               });
+//             } catch (error) {
+//               console.error('Error processing order:', error);
+//               alert(`Payment successful! Reference: ${response.reference}\nPlease contact support if you need assistance.`);
+//               navigate('/');
+//             } finally {
+//               setIsProcessing(false);
+//             }
+//           };
+          
+//           processOrder();
 //         },
 //         onClose: function () {
-//           // User closed the payment modal
 //           setIsProcessing(false);
-//           // Don't show alert if user intentionally closed it
 //         },
 //       });
 
 //       handler.openIframe();
 //     } catch (error) {
 //       console.error('Error setting up Paystack payment:', error);
-//       console.error('Error details:', {
-//         message: error.message,
-//         stack: error.stack,
-//         name: error.name,
-//         paystackReady,
-//         paystackPopExists: typeof window.PaystackPop !== 'undefined',
-//         apiKeyPresent: !!PAYSTACK_PUBLIC_KEY,
-//         apiKeyLength: PAYSTACK_PUBLIC_KEY?.length,
-//       });
 //       setIsProcessing(false);
       
-//       // More specific error messages
 //       let errorMessage = 'An error occurred while setting up payment. ';
 //       if (error.message) {
 //         errorMessage += `Error: ${error.message}`;
@@ -642,7 +574,6 @@
 //                     </div>
 //                   </div>
 //                   <div className="flex items-center gap-3 flex-shrink-0">
-//                     {/* Quantity Controls */}
 //                     <div className="flex items-center gap-2 bg-white rounded-lg border border-black/10 p-1">
 //                       <button
 //                         onClick={() => updateCartQuantity(item.id, -1)}
@@ -662,13 +593,11 @@
 //                         <Plus size={14} />
 //                       </button>
 //                     </div>
-//                     {/* Item Total */}
 //                     <div className="text-right w-24">
 //                       <div className="text-lg font-bold text-gray-900">
 //                         GH₵ {(item.price * item.quantity).toFixed(2)}
 //                       </div>
 //                     </div>
-//                     {/* Remove Button */}
 //                     <button
 //                       onClick={() => removeFromCart(item.id)}
 //                       className="p-2 rounded-lg hover:bg-red-100 transition-colors"
@@ -744,7 +673,6 @@
 //                 </p>
 //               </div>
 
-//               {/* Delivery Quotes */}
 //               {deliveryQuotes.length > 0 && (
 //                 <div className="mt-4">
 //                   <h3 className="text-sm font-semibold text-gray-700 mb-3">Select Delivery Option:</h3>
@@ -1349,7 +1277,7 @@ const Order = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="relative w-full min-h-screen py-16 sm:py-20">
+      <div className="relative w-full min-h-screen py-16 sm:py-20 overflow-x-hidden">
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <ShoppingBag size={64} className="mx-auto text-gray-400 mb-4" />
@@ -1369,8 +1297,8 @@ const Order = () => {
   }
 
   return (
-    <div className="relative w-full min-h-screen py-16 sm:py-20 pb-32">
-      <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div className="relative w-full min-h-screen py-16 sm:py-20 pb-32 overflow-x-hidden">
+      <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 w-full">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -1389,10 +1317,10 @@ const Order = () => {
         </div>
 
         {/* Order Items */}
-        <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6">
+        <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6 w-full">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Items</h2>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 whitespace-nowrap">
               {getTotalItems()} {getTotalItems() === 1 ? 'item' : 'items'}
             </span>
           </div>
@@ -1401,7 +1329,7 @@ const Order = () => {
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="p-3 sm:p-4 bg-gray-50 rounded-lg border border-black/5"
+                className="p-3 sm:p-4 bg-gray-50 rounded-lg border border-black/5 w-full"
               >
                 {/* Mobile Layout */}
                 <div className="block sm:hidden">
@@ -1417,11 +1345,11 @@ const Order = () => {
                         <p className="text-xs text-gray-500 mb-2 break-words">{item.description}</p>
                       )}
                       <div className="flex flex-wrap items-center gap-2 text-xs">
-                        <span className="font-semibold text-gray-700">
+                        <span className="font-semibold text-gray-700 whitespace-nowrap">
                           GH₵ {item.price}.00 each
                         </span>
                         {item.packSize && (
-                          <span className="text-gray-500">
+                          <span className="text-gray-500 whitespace-nowrap">
                             Pack of {item.packSize}
                           </span>
                         )}
@@ -1456,7 +1384,7 @@ const Order = () => {
                       </button>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-gray-900">
+                      <div className="text-lg font-bold text-gray-900 whitespace-nowrap">
                         GH₵ {(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
@@ -1476,11 +1404,11 @@ const Order = () => {
                       <p className="text-xs text-gray-500 mb-2 break-words">{item.description}</p>
                     )}
                     <div className="flex flex-wrap items-center gap-4">
-                      <div className="text-sm font-semibold text-gray-700">
+                      <div className="text-sm font-semibold text-gray-700 whitespace-nowrap">
                         GH₵ {item.price}.00 each
                       </div>
                       {item.packSize && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 whitespace-nowrap">
                           Pack of {item.packSize}
                         </div>
                       )}
@@ -1506,8 +1434,8 @@ const Order = () => {
                         <Plus size={14} />
                       </button>
                     </div>
-                    <div className="text-right w-24">
-                      <div className="text-lg font-bold text-gray-900">
+                    <div className="text-right min-w-[6rem]">
+                      <div className="text-lg font-bold text-gray-900 whitespace-nowrap">
                         GH₵ {(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
@@ -1526,10 +1454,10 @@ const Order = () => {
         </div>
 
         {/* Delivery Section */}
-        <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6 w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
             <div className="flex items-center gap-3">
-              <Truck className="text-[#ff9500]" size={24} />
+              <Truck className="text-[#ff9500] flex-shrink-0" size={24} />
               <h2 className="text-lg sm:text-xl font-bold text-gray-900">Delivery</h2>
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
@@ -1555,18 +1483,18 @@ const Order = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Delivery Address *
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={deliveryAddress.address}
                     onChange={handleDeliveryAddressChange}
                     placeholder="Enter your delivery address"
-                    className="flex-1 rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ff9500] focus:border-transparent"
+                    className="flex-1 w-full rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ff9500] focus:border-transparent"
                   />
                   <button
                     onClick={getDeliveryQuotes}
                     disabled={isLoadingQuotes || !deliveryAddress.address.trim()}
-                    className="px-4 py-2.5 rounded-lg bg-[#ff9500] text-white text-sm font-semibold hover:bg-[#e68600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-[#ff9500] text-white text-sm font-semibold hover:bg-[#e68600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
                   >
                     {isLoadingQuotes ? (
                       <>
@@ -1581,7 +1509,7 @@ const Order = () => {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1 break-words">
                   Pickup from: {PICKUP_LOCATION.address}
                 </p>
               </div>
@@ -1601,16 +1529,16 @@ const Order = () => {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-semibold text-sm text-gray-900">
+                          <div className="flex-1 min-w-0 pr-3">
+                            <div className="font-semibold text-sm text-gray-900 break-words">
                               {quote.service_name}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
                               ETA: {quote.eta_minutes} minutes
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-bold text-lg text-gray-900">
+                          <div className="text-right flex-shrink-0">
+                            <div className="font-bold text-lg text-gray-900 whitespace-nowrap">
                               GH₵ {quote.price.amount.toFixed(2)}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -1633,10 +1561,11 @@ const Order = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Customer Information and Order Summary - FIXED LAYOUT */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-6 w-full">
           {/* Customer Information */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6">
+          <div className="w-full lg:w-1/3">
+            <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 w-full">
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Customer Information</h2>
               <div className="space-y-4">
                 <div>
@@ -1688,18 +1617,18 @@ const Order = () => {
           </div>
 
           {/* Order Summary Card */}
-          <div className="lg:col-span-2">
-            <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6">
+          <div className="w-full lg:w-2/3">
+            <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 w-full">
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
               
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal ({getTotalItems()} items)</span>
-                  <span className="text-gray-900 font-semibold">GH₵ {getTotalPrice().toFixed(2)}</span>
+                  <span className="text-gray-900 font-semibold whitespace-nowrap">GH₵ {getTotalPrice().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Delivery Fee</span>
-                  <span className="text-gray-900 font-semibold">
+                  <span className="text-gray-900 font-semibold whitespace-nowrap">
                     {selectedQuote 
                       ? `GH₵ ${selectedQuote.price.amount.toFixed(2)}` 
                       : 'GH₵ 0.00'}
@@ -1708,7 +1637,7 @@ const Order = () => {
                 <div className="border-t border-gray-200 pt-3 mt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
-                    <span className="text-xl sm:text-2xl font-bold text-[#ff9500]">
+                    <span className="text-xl sm:text-2xl font-bold text-[#ff9500] whitespace-nowrap">
                       GH₵ {(getTotalPrice() + (selectedQuote ? selectedQuote.price.amount : 0)).toFixed(2)}
                     </span>
                   </div>
@@ -1720,7 +1649,7 @@ const Order = () => {
 
         {/* Payment Button - Fixed at bottom */}
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-black/10 p-4 shadow-lg z-10">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto px-4">
             <button
               onClick={handleProceedToPayment}
               disabled={isProcessing}
