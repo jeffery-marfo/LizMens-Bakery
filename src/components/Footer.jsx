@@ -14,9 +14,9 @@ const Footer = () => {
               CONTACT
             </h3>
             <div className="space-y-2 text-white/90 text-sm md:text-base">
-              <p className="hover:text-white transition-colors duration-300">Bomso, Kumasi, Ghana</p>
-              <p className="hover:text-white transition-colors duration-300">053 054 2266</p>
-              <p className="hover:text-white transition-colors duration-300">050 008 0382</p>
+              <p className="hover:text-white transition-colors duration-300">KAE DABI HOUSE, Teshie, Aboma, Accra, Ghana</p>
+              <p className="hover:text-white transition-colors duration-300">0244 097 094</p>
+              <p className="hover:text-white transition-colors duration-300">020 572 1817</p>
             </div>
           </div>
 
@@ -48,7 +48,7 @@ const Footer = () => {
 
             {/* Tagline */}
             <p className="text-white/90 text-sm md:text-base mb-6 max-w-md text-left md:text-right leading-relaxed hover:text-white transition-colors duration-300">
-              A Jewel of Food & Art. Experience culinary excellence in every bite.
+            Handcrafted with care. Made fresh daily with premium ingredients and traditional recipes.
             </p>
 
             {/* Social Media Icons */}

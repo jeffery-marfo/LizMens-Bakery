@@ -2,7 +2,6 @@
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-import NoBGPattern from '../assets/images/NoBG_Pattern.png';
 import HeroImg from '../assets/images/HeroImg.png';
 import HeroImg2 from '../assets/images/HeroImg2.png';
 import HeroImg3 from '../assets/images/HeroImg3.png';
@@ -104,17 +103,6 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen w-full overflow-hidden">
-      {/* BACKGROUND PATTERN - NoBG_Pattern.png */}
-      <div
-        className="opacity-50 absolute inset-0"
-        style={{
-          backgroundImage: `url(${NoBGPattern})`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
-
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}

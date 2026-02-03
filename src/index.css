@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+body {
+  min-height: 100vh;
+  margin: 0;
+  background-image: url('/src/assets/images/NoBG_Pattern.png');
+  background-repeat: repeat;
+  background-size: cover;
+  background-position: center;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
