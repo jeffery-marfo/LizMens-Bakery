@@ -5,7 +5,6 @@ import Landing from './pages/Landing'
 import Menu from './pages/Menu'
 import Order from './pages/Order'
 import Delivery from './pages/Delivery'
-import Contact from './pages/Contact'
 
 
 
@@ -21,7 +20,6 @@ function App() {
     <Route path='/menu' element={<Menu/>} />
     <Route path='/order' element={<Order/>} />
     <Route path='/delivery' element={<Delivery/>} />
-    <Route path='/contact' element={<Contact/>} />
 
 
 

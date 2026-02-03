@@ -241,19 +241,6 @@ const ProductsSection = () => {
           ))}
         </div>
 
-        {/* Footer CTA */}
-        <div className="mt-12 sm:mt-16 text-center">
-          <p className="text-sm text-gray-600 mb-4">
-            Need a custom order or have questions?
-          </p>
-          <button 
-            onClick={() => navigate('/contact')}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#ff9500] px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#e68600] hover:shadow-sm"
-          >
-            <span>Contact Us</span>
-            <ArrowRight size={16} />
-          </button>
-        </div>
       </div>
 
       {/* Order Selection Modal */}
