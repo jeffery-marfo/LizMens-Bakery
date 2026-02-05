@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 // import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import { Plus, Minus, X, ArrowLeft, CreditCard, ShoppingBag, Loader2, Truck, MapPin } from 'lucide-react';
@@ -843,6 +844,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Minus, X, ArrowLeft, CreditCard, ShoppingBag, Loader2, Truck, MapPin } from 'lucide-react';
+=======
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Minus, X, ArrowLeft, CreditCard, ShoppingBag, Loader2, Truck, MapPin, Store, ExternalLink } from 'lucide-react';
+>>>>>>> feat/DeliveryTest_SailRides
 
 const Order = () => {
   const navigate = useNavigate();
@@ -853,7 +859,11 @@ const Order = () => {
     phone: '',
     orderNotes: '',
   });
+<<<<<<< HEAD
   const [deliveryEnabled, setDeliveryEnabled] = useState(false);
+=======
+  const [orderType, setOrderType] = useState('pickup'); // 'pickup' or 'delivery'
+>>>>>>> feat/DeliveryTest_SailRides
   const [deliveryAddress, setDeliveryAddress] = useState({
     address: '',
     lat: null,
@@ -864,6 +874,20 @@ const Order = () => {
   const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
   const [deliveryBooking, setDeliveryBooking] = useState(null);
   const [paystackReady, setPaystackReady] = useState(false);
+<<<<<<< HEAD
+=======
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteInputRef = useRef(null);
+  const autocompleteServiceRef = useRef(null);
+  const placesServiceRef = useRef(null);
+  const paymentCallbackFiredRef = useRef(false);
+  const paystackInstanceRef = useRef(null);
+
+  // Payment status feedback (modal closed before Paystack confirmed)
+  const [paymentClosedWithoutConfirm, setPaymentClosedWithoutConfirm] = useState(false);
+  const [paymentConfirming, setPaymentConfirming] = useState(false);
+>>>>>>> feat/DeliveryTest_SailRides
 
   // Business pickup location (Teshie-Aboma, Accra, Ghana)
   const PICKUP_LOCATION = {
@@ -879,9 +903,15 @@ const Order = () => {
       setCart(JSON.parse(savedCart));
     }
 
+<<<<<<< HEAD
     // Check if Paystack script is loaded
     const checkPaystack = () => {
       if (typeof window !== 'undefined' && typeof window.PaystackPop !== 'undefined') {
+=======
+    // Check if Paystack script is loaded (V2 uses PaystackPop as constructor)
+    const checkPaystack = () => {
+      if (typeof window !== 'undefined' && typeof window.PaystackPop === 'function') {
+>>>>>>> feat/DeliveryTest_SailRides
         setPaystackReady(true);
         console.log('Paystack is ready');
       } else {
@@ -900,6 +930,49 @@ const Order = () => {
         setPaystackReady(false);
       });
     }
+<<<<<<< HEAD
+=======
+
+    // Initialize Google Places Autocomplete
+    const initAutocomplete = () => {
+      const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      
+      if (GOOGLE_MAPS_API_KEY && window.google && window.google.maps && window.google.maps.places) {
+        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        placesServiceRef.current = new window.google.maps.places.PlacesService(document.createElement('div'));
+      }
+    };
+
+    // Load Google Maps script dynamically if API key is available
+    const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (GOOGLE_MAPS_API_KEY) {
+      // Check if script is already loaded
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          if (window.google && window.google.maps && window.google.maps.places) {
+            initAutocomplete();
+          }
+        };
+        document.head.appendChild(script);
+      } else {
+        // Script already exists, check if Google Maps is loaded
+        if (window.google && window.google.maps && window.google.maps.places) {
+          initAutocomplete();
+        } else {
+          existingScript.addEventListener('load', () => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+              initAutocomplete();
+            }
+          });
+        }
+      }
+    }
+>>>>>>> feat/DeliveryTest_SailRides
   }, []);
 
   const updateCartQuantity = (itemId, delta) => {
@@ -935,10 +1008,89 @@ const Order = () => {
   };
 
   const handleDeliveryAddressChange = (e) => {
+<<<<<<< HEAD
     setDeliveryAddress({
       ...deliveryAddress,
       address: e.target.value,
     });
+=======
+    const value = e.target.value;
+    setDeliveryAddress({
+      ...deliveryAddress,
+      address: value,
+    });
+
+    // Trigger autocomplete suggestions
+    if (value.length > 2 && autocompleteServiceRef.current) {
+      const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (GOOGLE_MAPS_API_KEY) {
+        autocompleteServiceRef.current.getPlacePredictions(
+          {
+            input: value,
+            componentRestrictions: { country: 'gh' }, // Restrict to Ghana
+            types: ['address'], // Only show addresses
+          },
+          (predictions, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+              setAutocompleteSuggestions(predictions);
+              setShowSuggestions(true);
+            } else {
+              setAutocompleteSuggestions([]);
+              setShowSuggestions(false);
+            }
+          }
+        );
+      } else {
+        // Fallback to OpenStreetMap Nominatim if Google Maps API key is not available
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value + ', Ghana')}&limit=5`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              setAutocompleteSuggestions(data.map(item => ({
+                description: item.display_name,
+                place_id: item.place_id,
+                structured_formatting: {
+                  main_text: item.display_name.split(',')[0],
+                  secondary_text: item.display_name.split(',').slice(1).join(',').trim(),
+                },
+              })));
+              setShowSuggestions(true);
+            } else {
+              setAutocompleteSuggestions([]);
+              setShowSuggestions(false);
+            }
+          })
+          .catch(() => {
+            setAutocompleteSuggestions([]);
+            setShowSuggestions(false);
+          });
+      }
+    } else {
+      setAutocompleteSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelectAddress = async (suggestion) => {
+    const address = suggestion.description || suggestion.structured_formatting?.main_text + ', ' + suggestion.structured_formatting?.secondary_text;
+    
+    setDeliveryAddress({
+      ...deliveryAddress,
+      address: address,
+    });
+    setShowSuggestions(false);
+    setAutocompleteSuggestions([]);
+
+    // Geocode the selected address
+    const coords = await geocodeAddress(address);
+    if (coords) {
+      setDeliveryAddress({
+        address: address,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+    }
+>>>>>>> feat/DeliveryTest_SailRides
   };
 
   const getDeliveryQuotes = async () => {
@@ -1151,11 +1303,19 @@ const Order = () => {
     const sanitizedPhone = cleanedPhone.replace(/[^0-9]/g, '');
     const paystackEmail = `customer${sanitizedPhone}@eduromonaa.com`;
 
+<<<<<<< HEAD
     if (typeof window.PaystackPop === 'undefined' || !paystackReady) {
       alert('Payment gateway is loading. Please wait a moment and try again.');
       console.warn('Paystack not ready');
       setTimeout(() => {
         if (typeof window.PaystackPop !== 'undefined') {
+=======
+    if (typeof window.PaystackPop !== 'function' || !paystackReady) {
+      alert('Payment gateway is loading. Please wait a moment and try again.');
+      console.warn('Paystack not ready');
+      setTimeout(() => {
+        if (typeof window.PaystackPop === 'function') {
+>>>>>>> feat/DeliveryTest_SailRides
           setPaystackReady(true);
           handleProceedToPayment();
         } else {
@@ -1166,11 +1326,24 @@ const Order = () => {
     }
 
     setIsProcessing(true);
+<<<<<<< HEAD
 
     try {
       console.log('Setting up Paystack payment');
 
       const handler = window.PaystackPop.setup({
+=======
+    setPaymentClosedWithoutConfirm(false);
+    paymentCallbackFiredRef.current = false;
+
+    try {
+      console.log('Setting up Paystack payment (V2)');
+
+      const paystack = new window.PaystackPop();
+      paystackInstanceRef.current = paystack;
+
+      paystack.newTransaction({
+>>>>>>> feat/DeliveryTest_SailRides
         key: PAYSTACK_PUBLIC_KEY,
         email: paystackEmail,
         amount: totalAmount,
@@ -1205,6 +1378,7 @@ const Order = () => {
             },
           ],
         },
+<<<<<<< HEAD
         callback: function (response) {
           console.log('Payment successful:', response);
           
@@ -1212,6 +1386,20 @@ const Order = () => {
           const processOrder = async () => {
             try {
               if (deliveryEnabled && selectedQuote) {
+=======
+        onSuccess: (transaction) => {
+          paymentCallbackFiredRef.current = true;
+          console.log('Payment successful:', transaction);
+          // Close the Paystack modal immediately so it doesn't stay on "Checking transaction status"
+          if (paystackInstanceRef.current && typeof paystackInstanceRef.current.cancelTransaction === 'function') {
+            paystackInstanceRef.current.cancelTransaction();
+          }
+          setPaymentConfirming(true);
+
+          const processOrder = async () => {
+            try {
+              if (orderType === 'delivery' && selectedQuote) {
+>>>>>>> feat/DeliveryTest_SailRides
                 try {
                   const delivery = await bookDelivery(selectedQuote.id);
                   if (delivery) {
@@ -1222,16 +1410,26 @@ const Order = () => {
                   console.error('Delivery booking failed:', deliveryError);
                 }
               }
+<<<<<<< HEAD
               
               localStorage.removeItem('cart');
               
               localStorage.setItem('lastOrder', JSON.stringify({
                 reference: response.reference,
+=======
+
+              localStorage.removeItem('cart');
+
+              const txRef = transaction.reference || reference;
+              localStorage.setItem('lastOrder', JSON.stringify({
+                reference: txRef,
+>>>>>>> feat/DeliveryTest_SailRides
                 customerName: customerInfo.name,
                 customerPhone: cleanedPhone,
                 totalAmount: totalAmount / 100,
                 items: cart,
                 timestamp: new Date().toISOString(),
+<<<<<<< HEAD
                 deliveryBooked: deliveryEnabled && selectedQuote ? true : false,
               }));
               
@@ -1246,11 +1444,29 @@ const Order = () => {
             } catch (error) {
               console.error('Error processing order:', error);
               alert(`Payment successful! Reference: ${response.reference}\nPlease contact support if you need assistance.`);
+=======
+                deliveryBooked: orderType === 'delivery' && selectedQuote ? true : false,
+              }));
+
+              navigate('/', {
+                state: {
+                  paymentSuccess: true,
+                  reference: txRef,
+                  customerName: customerInfo.name,
+                  deliveryBooked: orderType === 'delivery' && selectedQuote ? true : false,
+                }
+              });
+            } catch (error) {
+              console.error('Error processing order:', error);
+              setPaymentConfirming(false);
+              alert(`Payment successful! Reference: ${transaction.reference || reference}\nPlease contact support if you need assistance.`);
+>>>>>>> feat/DeliveryTest_SailRides
               navigate('/');
             } finally {
               setIsProcessing(false);
             }
           };
+<<<<<<< HEAD
           
           processOrder();
         },
@@ -1260,6 +1476,18 @@ const Order = () => {
       });
 
       handler.openIframe();
+=======
+
+          processOrder();
+        },
+        onCancel: () => {
+          if (!paymentCallbackFiredRef.current) {
+            setPaymentClosedWithoutConfirm(true);
+          }
+          setIsProcessing(false);
+        },
+      });
+>>>>>>> feat/DeliveryTest_SailRides
     } catch (error) {
       console.error('Error setting up Paystack payment:', error);
       setIsProcessing(false);
@@ -1297,7 +1525,11 @@ const Order = () => {
   }
 
   return (
+<<<<<<< HEAD
     <div className="relative w-full min-h-screen py-16 sm:py-20 pb-32 overflow-x-hidden">
+=======
+    <div className="relative w-full min-h-screen py-16 sm:py-20 overflow-x-hidden">
+>>>>>>> feat/DeliveryTest_SailRides
       <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 w-full">
         {/* Header */}
         <div className="mb-8">
@@ -1453,6 +1685,7 @@ const Order = () => {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Delivery Section */}
         <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
@@ -1480,10 +1713,105 @@ const Order = () => {
           {deliveryEnabled && (
             <div className="space-y-4 mt-4">
               <div>
+=======
+        {/* Order Type Section */}
+        <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6 w-full">
+          <div className="flex items-center gap-3 mb-6">
+            <Truck className="text-[#ff9500] flex-shrink-0" size={24} />
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Order Type</h2>
+          </div>
+
+          {/* Radio Buttons for Pick Up vs Delivery */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <label className="flex-1 cursor-pointer">
+              <input
+                type="radio"
+                name="orderType"
+                value="pickup"
+                checked={orderType === 'pickup'}
+                onChange={(e) => {
+                  setOrderType(e.target.value);
+                  setDeliveryQuotes([]);
+                  setSelectedQuote(null);
+                }}
+                className="sr-only"
+              />
+              <div className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                orderType === 'pickup'
+                  ? 'border-[#ff9500] bg-[#ff9500]/10'
+                  : 'border-black/10 bg-white hover:border-black/20'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <Store className={`${orderType === 'pickup' ? 'text-[#ff9500]' : 'text-gray-600'}`} size={24} />
+                  <div>
+                    <div className="font-semibold text-sm text-gray-900">Pick Up</div>
+                    <div className="text-xs text-gray-500">Collect from our location</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <label className="flex-1 cursor-pointer">
+              <input
+                type="radio"
+                name="orderType"
+                value="delivery"
+                checked={orderType === 'delivery'}
+                onChange={(e) => {
+                  setOrderType(e.target.value);
+                  setDeliveryQuotes([]);
+                  setSelectedQuote(null);
+                }}
+                className="sr-only"
+              />
+              <div className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                orderType === 'delivery'
+                  ? 'border-[#ff9500] bg-[#ff9500]/10'
+                  : 'border-black/10 bg-white hover:border-black/20'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <Truck className={`${orderType === 'delivery' ? 'text-[#ff9500]' : 'text-gray-600'}`} size={24} />
+                  <div>
+                    <div className="font-semibold text-sm text-gray-900">Delivery</div>
+                    <div className="text-xs text-gray-500">We'll deliver to you</div>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          {/* Pick Up Location Display */}
+          {orderType === 'pickup' && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-black/10">
+              <div className="flex items-start gap-3">
+                <MapPin className="text-[#ff9500] flex-shrink-0 mt-0.5" size={20} />
+                <div className="flex-1">
+                  <div className="font-semibold text-sm text-gray-900 mb-1">Pickup Location</div>
+                  <div className="text-sm text-gray-700 mb-2">{PICKUP_LOCATION.address}</div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${PICKUP_LOCATION.lat},${PICKUP_LOCATION.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-[#ff9500] hover:text-[#e68600] transition-colors"
+                  >
+                    <span>View on Google Maps</span>
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Delivery Address Input with Autocomplete */}
+          {orderType === 'delivery' && (
+            <div className="space-y-4 mt-4">
+              <div className="relative">
+>>>>>>> feat/DeliveryTest_SailRides
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Delivery Address *
                 </label>
                 <div className="flex flex-col sm:flex-row gap-2">
+<<<<<<< HEAD
                   <input
                     type="text"
                     value={deliveryAddress.address}
@@ -1491,6 +1819,48 @@ const Order = () => {
                     placeholder="Enter your delivery address"
                     className="flex-1 w-full rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ff9500] focus:border-transparent"
                   />
+=======
+                  <div className="flex-1 relative">
+                    <input
+                      ref={autocompleteInputRef}
+                      type="text"
+                      value={deliveryAddress.address}
+                      onChange={handleDeliveryAddressChange}
+                      onFocus={() => {
+                        if (autocompleteSuggestions.length > 0) {
+                          setShowSuggestions(true);
+                        }
+                      }}
+                      onBlur={() => {
+                        // Delay hiding suggestions to allow click events
+                        setTimeout(() => setShowSuggestions(false), 200);
+                      }}
+                      placeholder="Start typing your address..."
+                      className="w-full rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ff9500] focus:border-transparent"
+                    />
+                    {showSuggestions && autocompleteSuggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-black/10 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {autocompleteSuggestions.map((suggestion, index) => (
+                          <button
+                            key={suggestion.place_id || index}
+                            type="button"
+                            onClick={() => handleSelectAddress(suggestion)}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-black/5 last:border-b-0"
+                          >
+                            <div className="font-medium text-sm text-gray-900">
+                              {suggestion.structured_formatting?.main_text || suggestion.description?.split(',')[0]}
+                            </div>
+                            {suggestion.structured_formatting?.secondary_text && (
+                              <div className="text-xs text-gray-500 mt-0.5">
+                                {suggestion.structured_formatting.secondary_text}
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+>>>>>>> feat/DeliveryTest_SailRides
                   <button
                     onClick={getDeliveryQuotes}
                     disabled={isLoadingQuotes || !deliveryAddress.address.trim()}
@@ -1521,7 +1891,18 @@ const Order = () => {
                     {deliveryQuotes.map((quote) => (
                       <button
                         key={quote.id}
+<<<<<<< HEAD
                         onClick={() => setSelectedQuote(quote)}
+=======
+                        onClick={() => {
+                          // Toggle selection: if already selected, unselect it
+                          if (selectedQuote?.id === quote.id) {
+                            setSelectedQuote(null);
+                          } else {
+                            setSelectedQuote(quote);
+                          }
+                        }}
+>>>>>>> feat/DeliveryTest_SailRides
                         className={`w-full p-3 rounded-lg border-2 transition-all duration-300 text-left ${
                           selectedQuote?.id === quote.id
                             ? 'border-[#ff9500] bg-[#ff9500]/10'
@@ -1530,11 +1911,28 @@ const Order = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0 pr-3">
+<<<<<<< HEAD
                             <div className="font-semibold text-sm text-gray-900 break-words">
                               {quote.service_name}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
                               ETA: {quote.eta_minutes} minutes
+=======
+                            <div className="font-semibold text-sm text-gray-900 break-words flex items-center gap-2">
+                              {quote.service_name || quote.provider || 'Delivery Service'}
+                              {selectedQuote?.id === quote.id && (
+                                <span className="text-[#ff9500] text-xs font-medium">(Selected)</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1 flex-wrap">
+                              {quote.provider && quote.provider !== quote.service_name && (
+                                <>
+                                  <span className="text-[#ff9500] font-medium">via {quote.provider}</span>
+                                  <span>•</span>
+                                </>
+                              )}
+                              <span>ETA: {quote.eta_minutes} minutes</span>
+>>>>>>> feat/DeliveryTest_SailRides
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0">
@@ -1604,12 +2002,20 @@ const Order = () => {
                     name="phone"
                     value={customerInfo.phone}
                     onChange={handleInputChange}
+<<<<<<< HEAD
                     placeholder="050 123 4567"
+=======
+                    placeholder="050 xxx xxxx"
+>>>>>>> feat/DeliveryTest_SailRides
                     className="w-full rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ff9500] focus:border-transparent"
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
+<<<<<<< HEAD
                     Format: 0501234567 or +233501234567
+=======
+                    Format: 050xxxxxxx or +23350xxxxxxx
+>>>>>>> feat/DeliveryTest_SailRides
                   </p>
                 </div>
               </div>
@@ -1647,6 +2053,7 @@ const Order = () => {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Payment Button - Fixed at bottom */}
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-black/10 p-4 shadow-lg z-10">
           <div className="max-w-4xl mx-auto px-4">
@@ -1673,6 +2080,66 @@ const Order = () => {
               Secure payment powered by Paystack
             </p>
           </div>
+=======
+        {/* Payment status messages */}
+        {isProcessing && !paymentConfirming && (
+          <div className="mb-4 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm" role="status">
+            <p className="font-medium">Waiting for payment</p>
+            <p className="mt-1 text-amber-700">
+              If you're using Mobile Money, confirmation usually takes <strong>10–30 seconds</strong>. Please keep this page open and complete the prompt on your phone. Do not close the payment window until you see a success message.
+            </p>
+          </div>
+        )}
+        {paymentConfirming && (
+          <div className="mb-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm flex items-center gap-3" role="status">
+            <Loader2 size={20} className="flex-shrink-0 animate-spin" />
+            <div>
+              <p className="font-medium">Payment confirmed</p>
+              <p className="mt-1 text-green-700">Completing your order and redirecting…</p>
+            </div>
+          </div>
+        )}
+        {paymentClosedWithoutConfirm && (
+          <div className="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm" role="alert">
+            <p className="font-medium">Payment window was closed</p>
+            <p className="mt-1 text-blue-700">
+              If you already completed the payment on your phone, it may still be processing. Wait a minute and refresh this page, or try "Proceed to Payment" again. If the amount was deducted but you don't see an order confirmation, contact us with your phone number and we'll help.
+            </p>
+            <button
+              type="button"
+              onClick={() => setPaymentClosedWithoutConfirm(false)}
+              className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-800 underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Payment Button */}
+        <div className="bg-white/85 rounded-2xl border border-black/10 shadow-sm backdrop-blur-sm p-4 sm:p-6 mb-6 w-full">
+          <button
+            onClick={handleProceedToPayment}
+            disabled={isProcessing}
+            className={`w-full rounded-lg bg-[#ff9500] px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold text-white transition-all duration-300 hover:bg-[#e68600] hover:shadow-lg flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isProcessing ? 'cursor-wait' : ''
+            }`}
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 size={18} className="sm:w-5 sm:h-5 animate-spin" />
+                <span>{paymentConfirming ? 'Completing order…' : 'Waiting for payment…'}</span>
+              </>
+            ) : (
+              <>
+                <CreditCard size={18} className="sm:w-5 sm:h-5" />
+                <span>Proceed to Payment</span>
+              </>
+            )}
+          </button>
+          <p className="text-xs text-center text-gray-500 mt-2">
+            Secure payment powered by Paystack
+          </p>
+>>>>>>> feat/DeliveryTest_SailRides
         </div>
       </div>
     </div>
