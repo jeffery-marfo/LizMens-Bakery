@@ -60,7 +60,7 @@ const ValueProposition = () => {
               </div>
 
               {/* tiny stat chip row (keeps cards lively without being long) */}
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-1">
                 <span className="rounded-lg bg-black/5 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
                   Made fresh
                 </span>
@@ -68,7 +68,7 @@ const ValueProposition = () => {
                   Party-ready
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-lg bg-black/5 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
-                  <BadgeDollarSign className="h-3.5 w-3.5" aria-hidden="true" />
+             
                   Affordable
                 </span>
               </div>

@@ -7,9 +7,9 @@ const Landing = () => {
   return (
     <div>
         <Hero/>
-        <ValueProposition/>
         <ProductsSection/>
-
+        <ValueProposition/>
+      
 
     </div>
   )

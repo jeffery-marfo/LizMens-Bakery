@@ -34,10 +34,10 @@ const Menu = () => {
         id: 'spring-rolls',
         name: 'Spring Rolls',
         description: 'Crispy golden spring rolls',
-        basePrice: 25,
+        basePrice: 1,
         image: HeroImg,
         fillings: [
-          { type: 'Chicken', price: 25 },
+          { type: 'Chicken', price: 1 },
           { type: 'Beef', price: 25 },
           { type: 'Veggie', price: 22 },
           { type: 'Beans', price: 20 },
