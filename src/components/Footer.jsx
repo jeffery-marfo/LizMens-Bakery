@@ -48,7 +48,7 @@ const Footer = () => {
 
             {/* Tagline */}
             <p className="text-white/90 text-sm md:text-base mb-6 max-w-md text-left md:text-right leading-relaxed hover:text-white transition-colors duration-300">
-            Handcrafted with care. Made fresh daily with premium ingredients and traditional recipes.
+              Handcrafted with care. Made fresh daily with premium ingredients and traditional recipes.
             </p>
 
             {/* Social Media Icons */}

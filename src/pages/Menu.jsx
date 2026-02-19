@@ -299,9 +299,8 @@ const Menu = () => {
     if (!selectedItem) return;
 
     const cartItem = {
-      id: `${selectedItem.id}-${
-        selectedItem.selectedFilling?.type || "default"
-      }-${Date.now()}`,
+      id: `${selectedItem.id}-${selectedItem.selectedFilling?.type || "default"
+        }-${Date.now()}`,
       name: selectedItem.name,
       filling: selectedItem.selectedFilling?.type,
       price:
@@ -373,11 +372,10 @@ const Menu = () => {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 capitalize ${
-                selectedCategory === category
-                  ? "bg-[#ff9500] text-white shadow-md"
-                  : "bg-white/85 border border-black/10 text-gray-700 hover:bg-gray-50"
-              }`}
+              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 capitalize ${selectedCategory === category
+                ? "bg-[#ff9500] text-white shadow-md"
+                : "bg-white/85 border border-black/10 text-gray-700 hover:bg-gray-50"
+                }`}
             >
               {category === "individual" ? "Individual Items" : category}
             </button>
@@ -483,26 +481,25 @@ const Menu = () => {
                     <div className="mb-6">
                       <label className="block text-sm font-semibold text-gray-900 mb-3">
                         {selectedItem.id.includes("spring-rolls") ||
-                        selectedItem.id.includes("samosas")
+                          selectedItem.id.includes("samosas")
                           ? "Choose Filling:"
                           : selectedItem.id.includes("platter") ||
                             selectedItem.id.includes("pack")
-                          ? "Choose Option:"
-                          : selectedItem.id.includes("unfried")
-                          ? "Choose Pack Size:"
-                          : "Choose Option:"}
+                            ? "Choose Option:"
+                            : selectedItem.id.includes("unfried")
+                              ? "Choose Pack Size:"
+                              : "Choose Option:"}
                       </label>
                       <div className="grid grid-cols-2 gap-3">
                         {selectedItem.fillings.map((filling) => (
                           <button
                             key={filling.type}
                             onClick={() => handleFillingSelect(filling)}
-                            className={`p-3 rounded-lg border-2 transition-all duration-300 text-sm font-semibold ${
-                              selectedItem.selectedFilling?.type ===
+                            className={`p-3 rounded-lg border-2 transition-all duration-300 text-sm font-semibold ${selectedItem.selectedFilling?.type ===
                               filling.type
-                                ? "border-[#ff9500] bg-[#ff9500]/10 text-[#ff9500]"
-                                : "border-black/10 bg-white text-gray-700 hover:border-black/20"
-                            }`}
+                              ? "border-[#ff9500] bg-[#ff9500]/10 text-[#ff9500]"
+                              : "border-black/10 bg-white text-gray-700 hover:border-black/20"
+                              }`}
                           >
                             <div className="font-bold">{filling.type}</div>
                             <div className="text-xs text-gray-500 mt-1">
@@ -546,10 +543,10 @@ const Menu = () => {
                         GH₵{" "}
                         {selectedItem.selectedFilling
                           ? selectedItem.selectedFilling.price *
-                            selectedItem.quantity
+                          selectedItem.quantity
                           : (selectedItem.price ||
-                              selectedItem.basePrice ||
-                              0) * selectedItem.quantity}
+                            selectedItem.basePrice ||
+                            0) * selectedItem.quantity}
                         .00
                       </span>
                     </div>
@@ -559,11 +556,10 @@ const Menu = () => {
                   <button
                     onClick={handleAddToCart}
                     disabled={!selectedItem.selectedFilling}
-                    className={`w-full rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                      !selectedItem.selectedFilling
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-[#ff9500] text-white hover:bg-[#e68600] hover:shadow-md"
-                    }`}
+                    className={`w-full rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${!selectedItem.selectedFilling
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-[#ff9500] text-white hover:bg-[#e68600] hover:shadow-md"
+                      }`}
                   >
                     <ShoppingCart size={18} />
                     <span>Add to Cart</span>

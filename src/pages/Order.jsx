@@ -13,6 +13,7 @@ import {
   Store,
   ExternalLink,
 } from "lucide-react";
+import { supabase } from "../supabaseClient";
 
 const Order = () => {
   const navigate = useNavigate();
@@ -252,8 +253,8 @@ const Order = () => {
     const address =
       suggestion.description ||
       suggestion.structured_formatting?.main_text +
-        ", " +
-        suggestion.structured_formatting?.secondary_text;
+      ", " +
+      suggestion.structured_formatting?.secondary_text;
 
     setDeliveryAddress({
       ...deliveryAddress,
@@ -454,6 +455,47 @@ const Order = () => {
     }
   };
 
+  // ─── WhatsApp Order Notification ───────────────────────────────────────
+  // Returns the wa.me URL (does NOT open it — call this synchronously before any awaits)
+  const buildWhatsAppOrderUrl = ({ customerName, customerPhone, items, totalAmount, orderNotes, orderType, deliveryAddress, txRef }) => {
+    const providerNumber = import.meta.env.VITE_PROVIDER_WHATSAPP_NUMBER;
+    if (!providerNumber || providerNumber === "233XXXXXXXXX") {
+      console.warn("Provider WhatsApp number not configured in .env (VITE_PROVIDER_WHATSAPP_NUMBER)");
+      return null;
+    }
+
+    const itemLines = items
+      .map((item) => `  • ${item.name}${item.filling ? ` (${item.filling})` : ""} x${item.quantity} — GH₵${(item.price * item.quantity).toFixed(2)}`)
+      .join("\n");
+
+    const deliveryLine =
+      orderType === "delivery"
+        ? `🚚 Delivery to: ${deliveryAddress?.address || "(address not set)"}`
+        : `🏪 Pickup in-store`;
+
+    const message = [
+      `🛍️ *NEW ORDER — Eduromɔ-naa*`,
+      ``,
+      `👤 *Customer:* ${customerName}`,
+      `📞 *Phone:* ${customerPhone}`,
+      ``,
+      `*Items Ordered:*`,
+      itemLines,
+      ``,
+      `💰 *Total Paid:* GH₵${Number(totalAmount).toFixed(2)}`,
+      deliveryLine,
+      orderNotes ? `📝 *Notes:* ${orderNotes}` : null,
+      ``,
+      `🔖 *Ref:* ${txRef}`,
+      `⏰ *Time:* ${new Date().toLocaleString("en-GH", { timeZone: "Africa/Accra" })}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    return `https://wa.me/${providerNumber}?text=${encodeURIComponent(message)}`;
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   const handleProceedToPayment = () => {
     if (!customerInfo.name || !customerInfo.phone) {
       alert("Please fill in your name and phone number");
@@ -574,10 +616,10 @@ const Order = () => {
             },
           ],
         },
-        onSuccess: (transaction) => {
+        onSuccess: async (transaction) => {
           paymentCallbackFiredRef.current = true;
           console.log("Payment successful:", transaction);
-          // Close the Paystack modal immediately so it doesn't stay on "Checking transaction status"
+
           if (
             paystackInstanceRef.current &&
             typeof paystackInstanceRef.current.cancelTransaction === "function"
@@ -586,64 +628,104 @@ const Order = () => {
           }
           setPaymentConfirming(true);
 
-          const processOrder = async () => {
-            try {
-              if (orderType === "delivery" && selectedQuote) {
-                try {
-                  const delivery = await bookDelivery(selectedQuote.id);
-                  if (delivery) {
-                    localStorage.setItem(
-                      "deliveryBooking",
-                      JSON.stringify(delivery)
-                    );
-                    console.log("Delivery booked successfully:", delivery);
-                  }
-                } catch (deliveryError) {
-                  console.error("Delivery booking failed:", deliveryError);
-                }
+          // Build WhatsApp URL NOW (synchronously, before any awaits) to avoid popup blocking
+          const txRefEarly = transaction.reference || reference;
+          const whatsappUrl = buildWhatsAppOrderUrl({
+            customerName: customerInfo.name,
+            customerPhone: cleanedPhone,
+            items: cart,
+            totalAmount: totalAmount / 100,
+            orderNotes: customerInfo.orderNotes,
+            orderType,
+            deliveryAddress,
+            txRef: txRefEarly,
+          });
+
+          try {
+            // DIRECT SAVE TO SUPABASE (Fallback for Localhost where Webhooks don't work)
+            const { error: supabaseError } = await supabase.from('orders').insert({
+              reference: transaction.reference || reference,
+              customer: {
+                name: customerInfo.name,
+                phone: cleanedPhone,
+                email: paystackEmail
+              },
+              items: cart,
+              total_amount: totalAmount / 100,
+              status: 'new',
+              delivery_info: {
+                notes: customerInfo.orderNotes,
+                delivery_address: orderType === 'delivery' ? deliveryAddress.address : 'Pickup',
+                delivery_booked: orderType === 'delivery' && selectedQuote ? true : false
               }
+            });
 
-              localStorage.removeItem("cart");
-
-              const txRef = transaction.reference || reference;
-              localStorage.setItem(
-                "lastOrder",
-                JSON.stringify({
-                  reference: txRef,
-                  customerName: customerInfo.name,
-                  customerPhone: cleanedPhone,
-                  totalAmount: totalAmount / 100,
-                  items: cart,
-                  timestamp: new Date().toISOString(),
-                  deliveryBooked:
-                    orderType === "delivery" && selectedQuote ? true : false,
-                })
-              );
-
-              navigate("/", {
-                state: {
-                  paymentSuccess: true,
-                  reference: txRef,
-                  customerName: customerInfo.name,
-                  deliveryBooked:
-                    orderType === "delivery" && selectedQuote ? true : false,
-                },
-              });
-            } catch (error) {
-              console.error("Error processing order:", error);
-              setPaymentConfirming(false);
-              alert(
-                `Payment successful! Reference: ${
-                  transaction.reference || reference
-                }\nPlease contact support if you need assistance.`
-              );
-              navigate("/");
-            } finally {
-              setIsProcessing(false);
+            if (supabaseError) {
+              console.error("Supabase Save Error:", supabaseError);
+              // We continue even if save fails — WhatsApp will still open
+            } else {
+              console.log("Order saved to Supabase from Frontend");
             }
-          };
 
-          processOrder();
+            // ... Existing Delivery Logic ...
+            if (orderType === "delivery" && selectedQuote) {
+              try {
+                const delivery = await bookDelivery(selectedQuote.id);
+                if (delivery) {
+                  localStorage.setItem(
+                    "deliveryBooking",
+                    JSON.stringify(delivery)
+                  );
+                  console.log("Delivery booked successfully:", delivery);
+                }
+              } catch (deliveryError) {
+                console.error("Delivery booking failed:", deliveryError);
+              }
+            }
+
+            localStorage.removeItem("cart");
+
+            const txRef = transaction.reference || reference;
+            localStorage.setItem(
+              "lastOrder",
+              JSON.stringify({
+                reference: txRef,
+                customerName: customerInfo.name,
+                customerPhone: cleanedPhone,
+                totalAmount: totalAmount / 100,
+                items: cart,
+                timestamp: new Date().toISOString(),
+                deliveryBooked:
+                  orderType === "delivery" && selectedQuote ? true : false,
+              })
+            );
+
+            // Open WhatsApp LAST — right before navigating away.
+            // Using window.open here (close to synchronous flow) works on most browsers.
+            // If still blocked, the customer can tap the link on the success page.
+            if (whatsappUrl) {
+              window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+            }
+
+            navigate("/", {
+              state: {
+                paymentSuccess: true,
+                reference: txRef,
+                customerName: customerInfo.name,
+                deliveryBooked:
+                  orderType === "delivery" && selectedQuote ? true : false,
+                whatsappUrl, // pass URL to success page as fallback
+              },
+            });
+
+          } catch (error) {
+            console.error("Error processing order:", error);
+            setPaymentConfirming(false);
+            alert("Order processed but encountered an error saving details. Please contact support.");
+            navigate("/");
+          } finally {
+            setIsProcessing(false);
+          }
         },
         onCancel: () => {
           if (!paymentCallbackFiredRef.current) {
@@ -884,19 +966,17 @@ const Order = () => {
                 className="sr-only"
               />
               <div
-                className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                  orderType === "pickup"
-                    ? "border-[#ff9500] bg-[#ff9500]/10"
-                    : "border-black/10 bg-white hover:border-black/20"
-                }`}
+                className={`p-4 rounded-lg border-2 transition-all duration-300 ${orderType === "pickup"
+                  ? "border-[#ff9500] bg-[#ff9500]/10"
+                  : "border-black/10 bg-white hover:border-black/20"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Store
-                    className={`${
-                      orderType === "pickup"
-                        ? "text-[#ff9500]"
-                        : "text-gray-600"
-                    }`}
+                    className={`${orderType === "pickup"
+                      ? "text-[#ff9500]"
+                      : "text-gray-600"
+                      }`}
                     size={24}
                   />
                   <div>
@@ -925,19 +1005,17 @@ const Order = () => {
                 className="sr-only"
               />
               <div
-                className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                  orderType === "delivery"
-                    ? "border-[#ff9500] bg-[#ff9500]/10"
-                    : "border-black/10 bg-white hover:border-black/20"
-                }`}
+                className={`p-4 rounded-lg border-2 transition-all duration-300 ${orderType === "delivery"
+                  ? "border-[#ff9500] bg-[#ff9500]/10"
+                  : "border-black/10 bg-white hover:border-black/20"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Truck
-                    className={`${
-                      orderType === "delivery"
-                        ? "text-[#ff9500]"
-                        : "text-gray-600"
-                    }`}
+                    className={`${orderType === "delivery"
+                      ? "text-[#ff9500]"
+                      : "text-gray-600"
+                      }`}
                     size={24}
                   />
                   <div>
@@ -1023,13 +1101,13 @@ const Order = () => {
                             </div>
                             {suggestion.structured_formatting
                               ?.secondary_text && (
-                              <div className="text-xs text-gray-500 mt-0.5">
-                                {
-                                  suggestion.structured_formatting
-                                    .secondary_text
-                                }
-                              </div>
-                            )}
+                                <div className="text-xs text-gray-500 mt-0.5">
+                                  {
+                                    suggestion.structured_formatting
+                                      .secondary_text
+                                  }
+                                </div>
+                              )}
                           </button>
                         ))}
                       </div>
@@ -1077,11 +1155,10 @@ const Order = () => {
                             setSelectedQuote(quote);
                           }
                         }}
-                        className={`w-full p-3 rounded-lg border-2 transition-all duration-300 text-left ${
-                          selectedQuote?.id === quote.id
-                            ? "border-[#ff9500] bg-[#ff9500]/10"
-                            : "border-black/10 bg-white hover:border-black/20"
-                        }`}
+                        className={`w-full p-3 rounded-lg border-2 transition-all duration-300 text-left ${selectedQuote?.id === quote.id
+                          ? "border-[#ff9500] bg-[#ff9500]/10"
+                          : "border-black/10 bg-white hover:border-black/20"
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0 pr-3">
@@ -1291,9 +1368,8 @@ const Order = () => {
           <button
             onClick={handleProceedToPayment}
             disabled={isProcessing}
-            className={`w-full rounded-lg bg-[#ff9500] px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold text-white transition-all duration-300 hover:bg-[#e68600] hover:shadow-lg flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-50 disabled:cursor-not-allowed ${
-              isProcessing ? "cursor-wait" : ""
-            }`}
+            className={`w-full rounded-lg bg-[#ff9500] px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold text-white transition-all duration-300 hover:bg-[#e68600] hover:shadow-lg flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-50 disabled:cursor-not-allowed ${isProcessing ? "cursor-wait" : ""
+              }`}
           >
             {isProcessing ? (
               <>
